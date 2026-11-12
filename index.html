@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAE Simulation Lab — sim.qi-kleinod.com</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e17;--surface:#111827;--border:#1e293b;
+  --cyan:#22d3ee;--purple:#a78bfa;--emerald:#34d399;
+  --text:#e2e8f0;--muted:#94a3b8;
+  --glow-cyan:0 0 20px rgba(34,211,238,.15);
+  --glow-purple:0 0 20px rgba(167,139,250,.15);
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* Hero */
+.hero{text-align:center;padding:6rem 2rem 4rem;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(34,211,238,.06) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.02em}
+.hero h1 span.cyan{color:var(--cyan)}
+.hero h1 span.purple{color:var(--purple)}
+.hero .subtitle{color:var(--muted);font-size:1.1rem;margin-top:1rem;max-width:640px;margin-inline:auto;line-height:1.7}
+.hero .badge{display:inline-block;margin-top:1.5rem;padding:.4rem 1rem;border:1px solid var(--border);border-radius:999px;font-size:.8rem;color:var(--muted);background:var(--surface)}
+
+/* Module Grid */
+.modules{max-width:1100px;margin:0 auto;padding:2rem 2rem 6rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--cyan);box-shadow:var(--glow-cyan);transform:translateY(-2px)}
+.card .tag{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem}
+.tag.nvh{background:rgba(34,211,238,.12);color:var(--cyan)}
+.tag.strength{background:rgba(167,139,250,.12);color:var(--purple)}
+.tag.stiffness{background:rgba(52,211,153,.12);color:var(--emerald)}
+.tag.coming{background:rgba(148,163,184,.1);color:var(--muted)}
+.card h3{font-size:1.2rem;font-weight:700;margin-bottom:.6rem}
+.card p{color:var(--muted);font-size:.9rem;line-height:1.6}
+.card .arrow{position:absolute;bottom:1.5rem;right:1.5rem;color:var(--muted);font-size:1.2rem;transition:color .3s}
+.card:hover .arrow{color:var(--cyan)}
+.card.disabled{opacity:.5;pointer-events:none}
+.card.disabled:hover{transform:none;border-color:var(--border);box-shadow:none}
+
+/* Footer */
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border)}
+footer a{color:var(--cyan)}
+
+@media(max-width:640px){
+  .hero{padding:4rem 1.5rem 3rem}
+  .modules{padding:1.5rem;grid-template-columns:1fr}
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<section class="hero">
+  <h1><span class="cyan">CAE</span> Simulation <span class="purple">Lab</span></h1>
+  <p class="subtitle">
+    Finite element analysis demos built from scratch with Python —
+    no commercial software required. Explore structural mechanics, modal analysis,
+    and NVH through interactive examples.
+  </p>
+  <span class="badge">Open Source · Pure Python · Educational</span>
+</section>
+
+<section class="modules">
+
+  <a href="modules/biw-modal/biw-modal.html" class="card">
+    <span class="tag nvh">NVH / Modal</span>
+    <h3>BIW Modal Analysis</h3>
+    <p>Free-free modal analysis of a simplified Body-in-White beam-frame model.
+       Euler-Bernoulli beam elements, eigenvalue solve, animated mode shapes.</p>
+    <span class="arrow">→</span>
+  </a>
+
+  <div class="card disabled">
+    <span class="tag stiffness">Stiffness</span>
+    <h3>Torsional &amp; Bending Stiffness</h3>
+    <p>Static stiffness analysis — apply loads and boundary conditions to measure
+       global torsional and bending stiffness of the BIW.</p>
+    <span class="arrow">→</span>
+  </div>
+
+  <div class="card disabled">
+    <span class="tag strength">Strength</span>
+    <h3>Stress &amp; Strength Assessment</h3>
+    <p>Stress distribution under static load cases — identify critical sections
+       and evaluate structural margins.</p>
+    <span class="arrow">→</span>
+  </div>
+
+  <div class="card disabled">
+    <span class="tag nvh">NVH</span>
+    <h3>Frequency Response (FRF)</h3>
+    <p>Harmonic response analysis — apply excitation forces and compute
+       transfer functions to predict vibration and noise.</p>
+    <span class="arrow">→</span>
+  </div>
+
+</section>
+
+<footer>
+  <a href="https://nauhcnes.qi-kleinod.com">Nauhcnes</a> ·
+  <a href="https://qi-kleinod.com">qi-kleinod.com</a> · 2026
+</footer>
+
+</body>
+</html>

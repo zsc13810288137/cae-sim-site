@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIW Modal Analysis — CAE Simulation Lab</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e17;--surface:#111827;--surface2:#1a2234;--border:#1e293b;
+  --cyan:#22d3ee;--purple:#a78bfa;--emerald:#34d399;--amber:#fbbf24;
+  --text:#e2e8f0;--muted:#94a3b8;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.7}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+code,pre{font-family:'JetBrains Mono','Fira Code',monospace}
+
+/* Nav */
+nav{padding:1rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1rem}
+nav a.back{color:var(--muted);font-size:.9rem}
+nav a.back:hover{color:var(--cyan)}
+nav .tag{padding:.2rem .6rem;border-radius:6px;font-size:.7rem;font-weight:600;text-transform:uppercase;background:rgba(34,211,238,.12);color:var(--cyan)}
+
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:3rem 2rem 6rem}
+h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;margin-bottom:.5rem}
+h1 span{color:var(--cyan)}
+.meta{color:var(--muted);font-size:.85rem;margin-bottom:2.5rem}
+h2{font-size:1.4rem;font-weight:700;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.1rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--cyan)}
+p{margin-bottom:1rem;color:var(--muted)}
+p strong{color:var(--text)}
+
+/* Info boxes */
+.info-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1.5rem 0}
+.info-box.cyan{border-left:3px solid var(--cyan)}
+.info-box.purple{border-left:3px solid var(--purple)}
+.info-box.emerald{border-left:3px solid var(--emerald)}
+.info-box h4{font-size:.95rem;font-weight:700;margin-bottom:.5rem}
+.info-box ul{padding-left:1.2rem;color:var(--muted);font-size:.9rem}
+.info-box li{margin-bottom:.3rem}
+
+/* Model specs table */
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th,td{padding:.6rem 1rem;border:1px solid var(--border);text-align:left}
+th{background:var(--surface);color:var(--text);font-weight:600}
+td{color:var(--muted)}
+td:first-child{color:var(--text);font-weight:500}
+
+/* Figures */
+.figure{margin:2rem 0;text-align:center}
+.figure img{max-width:100%;border-radius:8px;border:1px solid var(--border)}
+.figure.overview img{max-width:100%}
+.caption{font-size:.8rem;color:var(--muted);margin-top:.5rem;font-style:italic}
+
+/* Mode grid */
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;margin:1.5rem 0}
+.mode-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .3s}
+.mode-card:hover{border-color:var(--cyan)}
+.mode-card img{width:100%;display:block}
+.mode-card .info{padding:1rem}
+.mode-card .freq{font-size:1.3rem;font-weight:800;color:var(--cyan)}
+.mode-card .type{font-size:.85rem;color:var(--muted);margin-top:.2rem}
+.mode-card .desc{font-size:.8rem;color:var(--muted);margin-top:.5rem;line-height:1.5}
+
+/* Download */
+.download-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:2rem 0;text-align:center}
+.download-section p{color:var(--muted);font-size:.9rem}
+.btn{display:inline-block;padding:.7rem 1.5rem;border-radius:8px;font-weight:600;font-size:.9rem;margin:.5rem;transition:all .3s}
+.btn.primary{background:var(--cyan);color:var(--bg)}
+.btn.primary:hover{background:#06b6d4;text-decoration:none}
+.btn.secondary{border:1px solid var(--border);color:var(--text)}
+.btn.secondary:hover{border-color:var(--cyan);text-decoration:none}
+
+/* Code block */
+.code-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;font-size:.8rem;margin:1rem 0;color:var(--muted)}
+
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border)}
+
+@media(max-width:640px){
+  .content{padding:2rem 1.2rem 4rem}
+  .mode-grid{grid-template-columns:1fr}
+  nav{padding:1rem 1.2rem}
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav>
+  <a href="../../" class="back">← CAE Lab</a>
+  <span class="tag">NVH / Modal</span>
+</nav>
+
+<div class="content">
+
+<h1><span>BIW</span> Free-Free Modal Analysis</h1>
+<p class="meta">Simplified Body-in-White beam-frame model · Pure Python · 56 nodes · 110 beam elements</p>
+
+<!-- ===== BACKGROUND ===== -->
+<h2>Why BIW Modal Analysis Matters</h2>
+
+<p>
+  The <strong>Body-in-White (BIW)</strong> is the bare structural skeleton of a vehicle —
+  everything before doors, glass, engine, and trim are added. Understanding its dynamic behavior
+  is critical for two reasons: <strong>structural safety</strong> and <strong>ride comfort</strong>.
+</p>
+
+<div class="info-box cyan">
+  <h4>🔧 Structural Safety</h4>
+  <ul>
+    <li><strong>Crash performance</strong> depends on how the BIW deforms and absorbs energy —
+        the same structure that vibrates in modal analysis carries crash loads</li>
+    <li><strong>Fatigue life</strong> — resonant vibrations amplify cyclic stresses; if a road
+        excitation frequency matches a mode, components fail much sooner</li>
+    <li><strong>Global stiffness</strong> — the first torsion and bending frequencies directly
+        indicate overall structural stiffness (target: torsion >30 Hz, bending >40 Hz)</li>
+  </ul>
+</div>
+
+<div class="info-box purple">
+  <h4>🎵 NVH &amp; Ride Comfort</h4>
+  <ul>
+    <li><strong>Noise, Vibration &amp; Harshness (NVH)</strong> — passengers feel structure-borne
+        vibration from engine, road, and wind; BIW modes below ~50 Hz are directly perceptible</li>
+    <li><strong>Boom &amp; drone</strong> — if a BIW mode frequency coincides with engine firing
+        order, the cabin amplifies low-frequency booming noise</li>
+    <li><strong>Steering feel</strong> — an insufficiently stiff front-end causes "cowl shake"
+        that degrades steering precision and driver confidence</li>
+    <li><strong>Door closing quality</strong> — higher global stiffness produces the satisfying
+        "thunk" rather than a tinny rattle</li>
+  </ul>
+</div>
+
+<div class="info-box emerald">
+  <h4>📊 Industry Benchmarks (typical sedan)</h4>
+  <ul>
+    <li>1st Torsion mode: 25–35 Hz</li>
+    <li>1st Lateral bending: 35–45 Hz</li>
+    <li>1st Vertical bending: 40–55 Hz</li>
+    <li>Total BIW mass (bare): 250–400 kg</li>
+  </ul>
+</div>
+
+<p>
+  <strong>Free-free modal analysis</strong> means the structure is unconstrained — no supports,
+  no boundary conditions. This isolates the BIW's intrinsic dynamic properties from any
+  mounting effects, making results directly comparable across different vehicle designs.
+</p>
+
+<!-- ===== MODEL ===== -->
+<h2>The Simplified BIW Model</h2>
+
+<div class="figure">
+  <img src="assets/biw_iso.png" alt="BIW model isometric view">
+  <div class="caption">Isometric view of the beam-frame BIW model</div>
+</div>
+
+<p>
+  This is a <strong>3D Euler-Bernoulli beam-frame model</strong> representing a mid-size sedan's
+  BIW. Each structural member (pillar, rail, cross-member) is modeled as a beam element with
+  6 DOF per node (3 translations + 3 rotations), giving 12 DOF per element.
+</p>
+
+<table>
+  <tr><th>Parameter</th><th>Value</th></tr>
+  <tr><td>Overall length</td><td>4.4 m</td></tr>
+  <tr><td>Half-width</td><td>0.75 m</td></tr>
+  <tr><td>Roof height</td><td>1.35 m</td></tr>
+  <tr><td>Material</td><td>Steel — E = 210 GPa, ρ = 7850 kg/m³, ν = 0.3</td></tr>
+  <tr><td>Element type</td><td>3D Euler-Bernoulli beam (12 DOF)</td></tr>
+  <tr><td>Solver</td><td>scipy.linalg.eigh (generalized eigenvalue)</td></tr>
+</table>
+
+<h3>Structural Members</h3>
+<p>
+  The model includes <strong>~25 distinct section types</strong>: floor rails, sill/rocker panels,
+  A/B/C pillars, roof rails, cowl bar, header bar, crash rails, strut towers, bumper beams,
+  door braces, engine bay hood frame, trunk structure, and floor cross-members — each with
+  representative cross-section properties.
+</p>
+
+<div class="figure">
+  <img src="assets/biw_side.png" alt="BIW model side view">
+  <div class="caption">Side view — showing the car profile with sloped A-pillar, B-pillar, and C-pillar</div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<h2>Modal Analysis Results</h2>
+
+<p>
+  The eigenvalue problem <strong>K·φ = ω²·M·φ</strong> was solved for the free-free condition.
+  Six rigid-body modes (near 0 Hz) are filtered out, leaving the elastic modes shown below.
+  Colors represent displacement magnitude (blue = node, red = antinode).
+</p>
+
+<div class="figure overview">
+  <img src="assets/biw_modes_overview.png" alt="All 6 mode shapes overview">
+  <div class="caption">Overview of the first 6 elastic mode shapes</div>
+</div>
+
+<h3>Mode Shapes (animated)</h3>
+
+<div class="mode-grid">
+
+  <div class="mode-card">
+    <img src="assets/biw_mode_1_29hz.gif" alt="Mode 1 animation" loading="lazy">
+    <div class="info">
+      <div class="freq">28.6 Hz</div>
+      <div class="type">Mode 1 — 1st Torsion</div>
+      <div class="desc">The front and rear of the vehicle twist in opposite directions about
+        the longitudinal axis. This is typically the lowest and most critical BIW mode.</div>
+    </div>
+  </div>
+
+  <div class="mode-card">
+    <img src="assets/biw_mode_2_47hz.gif" alt="Mode 2 animation" loading="lazy">
+    <div class="info">
+      <div class="freq">47.2 Hz</div>
+      <div class="type">Mode 2 — 1st Lateral Bending</div>
+      <div class="desc">The body bends side-to-side. Related to vehicle yaw stability and
+        lateral ride comfort under crosswind or lane-change maneuvers.</div>
+    </div>
+  </div>
+
+  <div class="mode-card">
+    <img src="assets/biw_mode_3_68hz.gif" alt="Mode 3 animation" loading="lazy">
+    <div class="info">
+      <div class="freq">68.2 Hz</div>
+      <div class="type">Mode 3 — 1st Vertical Bending</div>
+      <div class="desc">The body flexes up and down. Directly affects ride comfort — a low
+        bending frequency leads to perceptible "bouncing" on rough roads.</div>
+    </div>
+  </div>
+
+  <div class="mode-card">
+    <img src="assets/biw_mode_4_72hz.gif" alt="Mode 4 animation" loading="lazy">
+    <div class="info">
+      <div class="freq">72.0 Hz</div>
+      <div class="type">Mode 4 — 2nd Torsion</div>
+      <div class="desc">A higher-order torsion mode with a node near the B-pillar. Relevant
+        for local panel vibration and interior noise.</div>
+    </div>
+  </div>
+
+  <div class="mode-card">
+    <img src="assets/biw_mode_5_80hz.gif" alt="Mode 5 animation" loading="lazy">
+    <div class="info">
+      <div class="freq">80.2 Hz</div>
+      <div class="type">Mode 5 — Combined Bending</div>
+      <div class="desc">A combination of lateral and vertical bending with coupling
+        through the pillars. Complex mode shapes indicate good structural integration.</div>
+    </div>
+  </div>
+
+  <div class="mode-card">
+    <img src="assets/biw_mode_6_88hz.gif" alt="Mode 6 animation" loading="lazy">
+    <div class="info">
+      <div class="freq">87.8 Hz</div>
+      <div class="type">Mode 6 — 2nd Vertical Bending</div>
+      <div class="desc">Higher-order vertical bending with two inflection points.
+        This mode contributes to mid-frequency harshness and road noise transmission.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== METHOD ===== -->
+<h2>Method &amp; Theory</h2>
+
+<h3>Euler-Bernoulli Beam Element</h3>
+<p>
+  Each beam element has <strong>12 degrees of freedom</strong> (6 per node):
+  3 translations (u, v, w) and 3 rotations (θx, θy, θz). The element stiffness
+  matrix combines axial, bending (two planes), and torsional stiffness.
+  A consistent mass matrix is used for accurate dynamic behavior.
+</p>
+
+<h3>Coordinate Transformation</h3>
+<p>
+  Since beams have arbitrary 3D orientation, each element's local stiffness and mass
+  matrices are transformed to global coordinates via a 12×12 rotation matrix derived
+  from the element's direction cosines.
+</p>
+
+<h3>Eigenvalue Problem</h3>
+<div class="code-block">
+  <code>K · φ = ω² · M · φ</code><br><br>
+  Solved using <code>scipy.linalg.eigh(K, M)</code> — a generalized symmetric eigenvalue solver.<br>
+  The first 6 modes (ω ≈ 0) are rigid-body modes and are filtered out.
+</div>
+
+<!-- ===== DOWNLOAD ===== -->
+<h2>Source Code</h2>
+
+<p>
+  The complete analysis — geometry definition, element assembly, eigenvalue solve,
+  and visualization — is contained in a single Python script. It requires only
+  <code>numpy</code>, <code>scipy</code>, <code>pyvista</code>, and <code>imageio</code>.
+</p>
+
+<div class="download-section">
+  <p>Download the full source code and run it yourself:</p>
+  <a href="assets/biw_modal_analysis.py" download class="btn primary">⬇ biw_modal_analysis.py</a>
+  <br>
+  <p style="margin-top:1rem;font-size:.8rem">
+    Requirements: <code>pip install numpy scipy pyvista imageio</code>
+  </p>
+</div>
+
+</div>
+
+<footer>
+  <a href="../../">← Back to CAE Lab</a> ·
+  <a href="https://nauhcnes.qi-kleinod.com">Nauhcnes</a> · 2026
+</footer>
+
+</body>
+</html>
